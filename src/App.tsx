@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { SettingsProvider } from "@/contexts/SettingsContext";
+import { AppActionsProvider } from "@/contexts/AppActionsContext";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import Appointments from "./pages/Appointments";
@@ -20,10 +21,11 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="light" storageKey="ui-theme">
       <SettingsProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+        <AppActionsProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
             <Routes>
               <Route element={<DashboardLayout />}>
                 <Route path="/" element={<Dashboard />} />
@@ -36,8 +38,9 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AppActionsProvider>
       </SettingsProvider>
     </ThemeProvider>
   </QueryClientProvider>

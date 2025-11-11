@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, User, Plus, Filter, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useAppActions } from "@/contexts/AppActionsContext";
+import { useState } from "react";
 
 const appointments = [
   {
@@ -59,6 +61,15 @@ const statusColors = {
 };
 
 export default function Appointments() {
+  const { handleNewAppointment, handleViewAppointment, handleFilterAppointments, handleCalendarView } = useAppActions();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleNew = async () => {
+    setIsLoading(true);
+    await handleNewAppointment();
+    setIsLoading(false);
+  };
+
   return (
     <div className="space-y-6 animate-in">
       <div className="flex items-center justify-between">
@@ -68,9 +79,9 @@ export default function Appointments() {
             View and manage all appointments
           </p>
         </div>
-        <Button className="bg-gradient-primary">
+        <Button className="bg-gradient-primary" onClick={handleNew} disabled={isLoading}>
           <Plus className="w-4 h-4 mr-2" />
-          New Appointment
+          {isLoading ? 'Opening...' : 'New Appointment'}
         </Button>
       </div>
 
@@ -79,11 +90,11 @@ export default function Appointments() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input placeholder="Search appointments..." className="pl-9" />
         </div>
-        <Button variant="outline">
+        <Button variant="outline" onClick={handleFilterAppointments}>
           <Filter className="w-4 h-4 mr-2" />
           Filters
         </Button>
-        <Button variant="outline">
+        <Button variant="outline" onClick={handleCalendarView}>
           <Calendar className="w-4 h-4 mr-2" />
           Calendar View
         </Button>
@@ -132,7 +143,7 @@ export default function Appointments() {
                   >
                     {appointment.status}
                   </Badge>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={() => handleViewAppointment(appointment.id)}>
                     View
                   </Button>
                 </div>

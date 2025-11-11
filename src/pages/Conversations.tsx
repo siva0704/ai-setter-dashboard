@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MessageSquare, Bot, User, Clock } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useAppActions } from "@/contexts/AppActionsContext";
 
 const conversations = [
   {
@@ -47,6 +48,8 @@ const aiMetrics = [
 ];
 
 export default function Conversations() {
+  const { handleSelectConversation } = useAppActions();
+
   return (
     <div className="space-y-6 animate-in">
       <div className="flex items-center justify-between">
@@ -84,6 +87,7 @@ export default function Conversations() {
               <button
                 key={conv.id}
                 className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors text-left"
+                onClick={() => handleSelectConversation(conv.id)}
               >
                 <Avatar className="w-10 h-10">
                   <AvatarFallback className="bg-primary/10 text-primary">

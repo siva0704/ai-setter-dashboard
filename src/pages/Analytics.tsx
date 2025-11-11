@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, Users, DollarSign, Calendar } from "lucide-react";
+import { useAppActions } from "@/contexts/AppActionsContext";
+import { useState } from "react";
 import {
   LineChart,
   Line,
@@ -41,6 +43,15 @@ const satisfactionData = [
 ];
 
 export default function Analytics() {
+  const { handleExportReport, handleDateRangeFilter } = useAppActions();
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    await handleExportReport();
+    setIsExporting(false);
+  };
+
   return (
     <div className="space-y-6 animate-in">
       <div className="flex items-center justify-between">
@@ -51,11 +62,13 @@ export default function Analytics() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleDateRangeFilter}>
             <Calendar className="w-4 h-4 mr-2" />
             Last 6 Months
           </Button>
-          <Button variant="outline">Export Report</Button>
+          <Button variant="outline" onClick={handleExport} disabled={isExporting}>
+            {isExporting ? 'Exporting...' : 'Export Report'}
+          </Button>
         </div>
       </div>
 

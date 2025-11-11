@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Plus, Mail, Phone, Calendar, TrendingUp } from "lucide-react";
+import { useAppActions } from "@/contexts/AppActionsContext";
+import { useState } from "react";
 
 const providers = [
   {
@@ -52,6 +54,15 @@ const providers = [
 ];
 
 export default function Providers() {
+  const { handleAddProvider, handleViewSchedule, handleEditProvider } = useAppActions();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleAdd = async () => {
+    setIsLoading(true);
+    await handleAddProvider();
+    setIsLoading(false);
+  };
+
   return (
     <div className="space-y-6 animate-in">
       <div className="flex items-center justify-between">
@@ -61,9 +72,9 @@ export default function Providers() {
             Manage your healthcare providers and their schedules
           </p>
         </div>
-        <Button className="bg-gradient-primary">
+        <Button className="bg-gradient-primary" onClick={handleAdd} disabled={isLoading}>
           <Plus className="w-4 h-4 mr-2" />
-          Add Provider
+          {isLoading ? 'Opening...' : 'Add Provider'}
         </Button>
       </div>
 
@@ -164,10 +175,10 @@ export default function Providers() {
                 </div>
 
                 <div className="flex gap-2 pt-2">
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => handleViewSchedule(provider.id)}>
                     View Schedule
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => handleEditProvider(provider.id)}>
                     Edit Profile
                   </Button>
                 </div>

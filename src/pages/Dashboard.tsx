@@ -10,6 +10,7 @@ import {
   Plus,
   Sparkles
 } from "lucide-react";
+import { useAppActions } from "@/contexts/AppActionsContext";
 import {
   LineChart,
   Line,
@@ -89,6 +90,8 @@ const statsCards = [
 ];
 
 export default function Dashboard() {
+  const { handleAddAppointment, handleViewAIDetails, handleDateFilter } = useAppActions();
+
   return (
     <div className="space-y-6 animate-in">
       {/* Header */}
@@ -100,11 +103,11 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleDateFilter}>
             <Calendar className="w-4 h-4 mr-2" />
             This Month
           </Button>
-          <Button className="bg-gradient-primary">
+          <Button className="bg-gradient-primary" onClick={handleAddAppointment}>
             <Plus className="w-4 h-4 mr-2" />
             Add Appointment
           </Button>
@@ -123,7 +126,7 @@ export default function Dashboard() {
               📈 Bookings expected to rise 18% next week based on historical patterns and current trends
             </p>
           </div>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleViewAIDetails}>
             View Details
           </Button>
         </CardContent>
