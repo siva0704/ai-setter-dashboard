@@ -3,20 +3,13 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import { useSettings } from "@/contexts/SettingsContext";
 
 export default function NotificationsSection() {
-  const [notifications, setNotifications] = useState({
-    email: true,
-    sms: true,
-    whatsapp: false,
-    emailTime: '24h',
-    smsTime: '1h',
-    whatsappTime: '2h',
-  });
+  const { notifications, updateNotifications } = useSettings();
 
   const updateNotification = (key: string, value: any) => {
-    setNotifications(prev => ({ ...prev, [key]: value }));
+    updateNotifications({ [key]: value });
   };
 
   return (

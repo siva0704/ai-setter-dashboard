@@ -36,22 +36,34 @@ interface BusinessHours {
   [key: string]: { enabled: boolean; start: string; end: string };
 }
 
+interface NotificationSettings {
+  email: boolean;
+  sms: boolean;
+  whatsapp: boolean;
+  emailTime: string;
+  smsTime: string;
+  whatsappTime: string;
+}
+
 interface SettingsContextType {
   businessProfile: BusinessProfile;
   updateBusinessProfile: (profile: Partial<BusinessProfile>) => void;
   integrations: Integration[];
   toggleIntegration: (id: string) => Promise<void>;
   users: User[];
-  addUser: (user: Omit<User, 'id'>) => void;
-  updateUser: (id: string, user: Partial<User>) => void;
-  deleteUser: (id: string) => void;
+  addUser: (user: Omit<User, 'id'>) => Promise<void>;
+  updateUser: (id: string, user: Partial<User>) => Promise<void>;
+  deleteUser: (id: string) => Promise<void>;
   services: Service[];
-  addService: (service: Omit<Service, 'id'>) => void;
-  updateService: (id: string, service: Partial<Service>) => void;
-  deleteService: (id: string) => void;
+  addService: (service: Omit<Service, 'id'>) => Promise<void>;
+  updateService: (id: string, service: Partial<Service>) => Promise<void>;
+  deleteService: (id: string) => Promise<void>;
   businessHours: BusinessHours;
   updateBusinessHours: (hours: BusinessHours) => void;
+  notifications: NotificationSettings;
+  updateNotifications: (notifications: Partial<NotificationSettings>) => void;
   saveSettings: () => Promise<void>;
+  isFormValid: boolean;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -95,6 +107,21 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     sunday: { enabled: false, start: '10:00', end: '14:00' },
   });
 
+  const [notifications, setNotifications] = useState<NotificationSettings>({
+    email: true,
+    sms: true,
+    whatsapp: false,
+    emailTime: '24h',
+    smsTime: '1h',
+    whatsappTime: '2h',
+  });
+
+  // Form validation
+  const isFormValid = 
+    businessProfile.companyName.trim().length > 0 &&
+    businessProfile.email.trim().length > 0 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(businessProfile.email);
+
   const updateBusinessProfile = (profile: Partial<BusinessProfile>) => {
     setBusinessProfile(prev => ({ ...prev, ...profile }));
   };
@@ -120,51 +147,78 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
-  const addUser = (user: Omit<User, 'id'>) => {
+  const addUser = async (user: Omit<User, 'id'>) => {
+    toast.loading('Adding user...', { id: 'user-action' });
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
     const newUser = { ...user, id: Date.now().toString() };
     setUsers(prev => [...prev, newUser]);
-    toast.success('User added successfully');
+    toast.success('User added successfully', { id: 'user-action' });
   };
 
-  const updateUser = (id: string, user: Partial<User>) => {
+  const updateUser = async (id: string, user: Partial<User>) => {
+    toast.loading('Updating user...', { id: 'user-action' });
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
     setUsers(prev =>
       prev.map(u => (u.id === id ? { ...u, ...user } : u))
     );
-    toast.success('User updated successfully');
+    toast.success('User updated successfully', { id: 'user-action' });
   };
 
-  const deleteUser = (id: string) => {
+  const deleteUser = async (id: string) => {
+    toast.loading('Deleting user...', { id: 'user-action' });
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
     setUsers(prev => prev.filter(u => u.id !== id));
-    toast.success('User deleted successfully');
+    toast.success('User deleted successfully', { id: 'user-action' });
   };
 
-  const addService = (service: Omit<Service, 'id'>) => {
+  const addService = async (service: Omit<Service, 'id'>) => {
+    toast.loading('Adding service...', { id: 'service-action' });
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
     const newService = { ...service, id: Date.now().toString() };
     setServices(prev => [...prev, newService]);
-    toast.success('Service added successfully');
+    toast.success('Service added successfully', { id: 'service-action' });
   };
 
-  const updateService = (id: string, service: Partial<Service>) => {
+  const updateService = async (id: string, service: Partial<Service>) => {
+    toast.loading('Updating service...', { id: 'service-action' });
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
     setServices(prev =>
       prev.map(s => (s.id === id ? { ...s, ...service } : s))
     );
-    toast.success('Service updated successfully');
+    toast.success('Service updated successfully', { id: 'service-action' });
   };
 
-  const deleteService = (id: string) => {
+  const deleteService = async (id: string) => {
+    toast.loading('Deleting service...', { id: 'service-action' });
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
     setServices(prev => prev.filter(s => s.id !== id));
-    toast.success('Service deleted successfully');
+    toast.success('Service deleted successfully', { id: 'service-action' });
   };
 
   const updateBusinessHours = (hours: BusinessHours) => {
     setBusinessHours(hours);
   };
 
+  const updateNotifications = (updatedNotifications: Partial<NotificationSettings>) => {
+    setNotifications(prev => ({ ...prev, ...updatedNotifications }));
+  };
+
   const saveSettings = async () => {
+    if (!isFormValid) {
+      toast.error('Please fill in all required fields correctly');
+      return;
+    }
+
     toast.loading('Saving settings...', { id: 'save' });
     
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 1500));
     
     toast.success('Settings saved successfully', { id: 'save' });
   };
@@ -186,7 +240,10 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         deleteService,
         businessHours,
         updateBusinessHours,
+        notifications,
+        updateNotifications,
         saveSettings,
+        isFormValid,
       }}
     >
       {children}

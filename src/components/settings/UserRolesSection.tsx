@@ -15,6 +15,8 @@ export default function UserRolesSection() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
   const [formData, setFormData] = useState({ name: '', email: '', role: 'viewer' as 'admin' | 'staff' | 'viewer' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState({ name: '', email: '' });
 
   const handleOpenDialog = (user?: any) => {
     if (user) {
@@ -24,16 +26,49 @@ export default function UserRolesSection() {
       setEditingUser(null);
       setFormData({ name: '', email: '', role: 'viewer' });
     }
+    setErrors({ name: '', email: '' });
     setIsDialogOpen(true);
   };
 
-  const handleSubmit = () => {
-    if (editingUser) {
-      updateUser(editingUser.id, formData);
-    } else {
-      addUser(formData);
+  const validateForm = () => {
+    const newErrors = { name: '', email: '' };
+    let isValid = true;
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+      isValid = false;
     }
-    setIsDialogOpen(false);
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+      isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Invalid email format';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+    try {
+      if (editingUser) {
+        await updateUser(editingUser.id, formData);
+      } else {
+        await addUser(formData);
+      }
+      setIsDialogOpen(false);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteUser(id);
   };
 
   const getRoleBadgeColor = (role: string) => {
@@ -93,7 +128,7 @@ export default function UserRolesSection() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => deleteUser(user.id)}
+                          onClick={() => handleDelete(user.id)}
                         >
                           <Trash2 className="w-4 h-4 text-destructive" />
                         </Button>
@@ -114,21 +149,29 @@ export default function UserRolesSection() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">Name *</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className={errors.name ? 'border-destructive' : ''}
               />
+              {errors.name && (
+                <p className="text-xs text-destructive">{errors.name}</p>
+              )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Email *</Label>
               <Input
                 id="email"
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className={errors.email ? 'border-destructive' : ''}
               />
+              {errors.email && (
+                <p className="text-xs text-destructive">{errors.email}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="role">Role</Label>
@@ -145,11 +188,11 @@ export default function UserRolesSection() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button onClick={handleSubmit}>
-              {editingUser ? 'Update' : 'Add'} User
+            <Button onClick={handleSubmit} disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : editingUser ? 'Update User' : 'Add User'}
             </Button>
           </DialogFooter>
         </DialogContent>

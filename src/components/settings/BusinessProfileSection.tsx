@@ -4,9 +4,27 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Upload } from "lucide-react";
+import { useState } from "react";
 
 export default function BusinessProfileSection() {
   const { businessProfile, updateBusinessProfile } = useSettings();
+  const [errors, setErrors] = useState({ companyName: '', email: '' });
+
+  const validateField = (field: string, value: string) => {
+    if (field === 'companyName' && !value.trim()) {
+      setErrors(prev => ({ ...prev, companyName: 'Company name is required' }));
+    } else if (field === 'companyName') {
+      setErrors(prev => ({ ...prev, companyName: '' }));
+    }
+
+    if (field === 'email' && !value.trim()) {
+      setErrors(prev => ({ ...prev, email: 'Email is required' }));
+    } else if (field === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      setErrors(prev => ({ ...prev, email: 'Invalid email format' }));
+    } else if (field === 'email') {
+      setErrors(prev => ({ ...prev, email: '' }));
+    }
+  };
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -48,25 +66,41 @@ export default function BusinessProfileSection() {
           </div>
           <div className="flex-1 space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="companyName">Company Name</Label>
+              <Label htmlFor="companyName">Company Name *</Label>
               <Input
                 id="companyName"
                 value={businessProfile.companyName}
-                onChange={(e) => updateBusinessProfile({ companyName: e.target.value })}
+                onChange={(e) => {
+                  updateBusinessProfile({ companyName: e.target.value });
+                  validateField('companyName', e.target.value);
+                }}
+                onBlur={(e) => validateField('companyName', e.target.value)}
+                className={errors.companyName ? 'border-destructive' : ''}
               />
+              {errors.companyName && (
+                <p className="text-xs text-destructive">{errors.companyName}</p>
+              )}
             </div>
           </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="email">Contact Email</Label>
+            <Label htmlFor="email">Contact Email *</Label>
             <Input
               id="email"
               type="email"
               value={businessProfile.email}
-              onChange={(e) => updateBusinessProfile({ email: e.target.value })}
+              onChange={(e) => {
+                updateBusinessProfile({ email: e.target.value });
+                validateField('email', e.target.value);
+              }}
+              onBlur={(e) => validateField('email', e.target.value)}
+              className={errors.email ? 'border-destructive' : ''}
             />
+            {errors.email && (
+              <p className="text-xs text-destructive">{errors.email}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number</Label>

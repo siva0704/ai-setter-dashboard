@@ -1,3 +1,4 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Save } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -10,7 +11,14 @@ import NotificationsSection from "@/components/settings/NotificationsSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Settings() {
-  const { saveSettings } = useSettings();
+  const { saveSettings, isFormValid } = useSettings();
+  const [isSaving, setIsSaving] = React.useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    await saveSettings();
+    setIsSaving(false);
+  };
 
   return (
     <div className="space-y-6 animate-in">
@@ -21,9 +29,13 @@ export default function Settings() {
             Configure your AI assistant and integrations
           </p>
         </div>
-        <Button className="bg-gradient-primary" onClick={saveSettings}>
+        <Button 
+          className="bg-gradient-primary" 
+          onClick={handleSave}
+          disabled={!isFormValid || isSaving}
+        >
           <Save className="w-4 h-4 mr-2" />
-          Save Changes
+          {isSaving ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>
 

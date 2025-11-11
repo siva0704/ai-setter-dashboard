@@ -13,6 +13,8 @@ export default function BusinessHoursSection() {
   const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<any>(null);
   const [serviceForm, setServiceForm] = useState({ name: '', duration: 30, price: 0, buffer: 5 });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState({ name: '' });
 
   const days = [
     { key: 'monday', label: 'Monday' },
@@ -46,16 +48,37 @@ export default function BusinessHoursSection() {
       setEditingService(null);
       setServiceForm({ name: '', duration: 30, price: 0, buffer: 5 });
     }
+    setErrors({ name: '' });
     setIsServiceDialogOpen(true);
   };
 
-  const handleServiceSubmit = () => {
-    if (editingService) {
-      updateService(editingService.id, serviceForm);
-    } else {
-      addService(serviceForm);
+  const validateForm = () => {
+    if (!serviceForm.name.trim()) {
+      setErrors({ name: 'Service name is required' });
+      return false;
     }
-    setIsServiceDialogOpen(false);
+    setErrors({ name: '' });
+    return true;
+  };
+
+  const handleServiceSubmit = async () => {
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+    try {
+      if (editingService) {
+        await updateService(editingService.id, serviceForm);
+      } else {
+        await addService(serviceForm);
+      }
+      setIsServiceDialogOpen(false);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleServiceDelete = async (id: string) => {
+    await deleteService(id);
   };
 
   return (
@@ -122,7 +145,7 @@ export default function BusinessHoursSection() {
                   <Button variant="ghost" size="sm" onClick={() => handleOpenServiceDialog(service)}>
                     <Edit className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => deleteService(service.id)}>
+                  <Button variant="ghost" size="sm" onClick={() => handleServiceDelete(service.id)}>
                     <Trash2 className="w-4 h-4 text-destructive" />
                   </Button>
                 </div>
@@ -139,12 +162,16 @@ export default function BusinessHoursSection() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="serviceName">Service Name</Label>
+              <Label htmlFor="serviceName">Service Name *</Label>
               <Input
                 id="serviceName"
                 value={serviceForm.name}
                 onChange={(e) => setServiceForm({ ...serviceForm, name: e.target.value })}
+                className={errors.name ? 'border-destructive' : ''}
               />
+              {errors.name && (
+                <p className="text-xs text-destructive">{errors.name}</p>
+              )}
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
@@ -177,11 +204,11 @@ export default function BusinessHoursSection() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsServiceDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setIsServiceDialogOpen(false)} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button onClick={handleServiceSubmit}>
-              {editingService ? 'Update' : 'Add'} Service
+            <Button onClick={handleServiceSubmit} disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : editingService ? 'Update Service' : 'Add Service'}
             </Button>
           </DialogFooter>
         </DialogContent>
