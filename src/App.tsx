@@ -21,26 +21,26 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="light" storageKey="ui-theme">
       <SettingsProvider>
-        <AppActionsProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-            <Routes>
-              <Route element={<DashboardLayout />}>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/appointments" element={<Appointments />} />
-                <Route path="/conversations" element={<Conversations />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/providers" element={<Providers />} />
-                <Route path="/settings" element={<Settings />} />
-              </Route>
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </AppActionsProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AppActionsProvider>
+              <Routes>
+                <Route element={<DashboardLayout />}>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/appointments" element={<Appointments />} />
+                  <Route path="/conversations" element={<Conversations />} />
+                  <Route path="/analytics" element={<Analytics />} />
+                  <Route path="/providers" element={<Providers />} />
+                  <Route path="/settings" element={<Settings />} />
+                </Route>
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AppActionsProvider>
+          </BrowserRouter>
+        </TooltipProvider>
       </SettingsProvider>
     </ThemeProvider>
   </QueryClientProvider>
